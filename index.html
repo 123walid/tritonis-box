@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e8eeea">
+  <meta name="description" content="Interactive Tritonis smart irrigation controller installation and wiring simulation.">
+  <title>Tritonis — Installation Lab</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <a class="brand" href="#overview" aria-label="Tritonis installation lab home">
+        <img src="/tritonis-logo.png" alt="Tritonis by Tanit">
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-title">Installation Lab</span>
+      </a>
+      <div class="topbar-meta"><span class="status-dot"></span> Interactive concept <span class="rev">REV B</span></div>
+      <button id="help-button" class="icon-button" aria-label="Open project notes" title="Project notes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.3 2.3 0 1 1 3.2 2.1c-.7.4-1 1-1 1.9M12 17h.01"></path></svg>
+      </button>
+    </header>
+
+    <nav id="view-nav" class="view-nav" aria-label="3D views"></nav>
+
+    <main id="viewport" aria-label="Interactive 3D pump controller installation">
+      <div id="scene-container"></div>
+      <div id="scene-poster" class="scene-poster">
+        <img src="/tritonis-logo.png" alt="">
+        <p>Preparing the installation environment…</p>
+      </div>
+      <div class="scene-toolbar" aria-label="Scene tools">
+        <button id="wires-toggle" class="tool-button active" aria-pressed="true" title="Toggle wiring (W)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h5c4 0 2 10 6 10h5M18 4l3 3-3 3M18 14l3 3-3 3"></path></svg><span>Wiring</span>
+        </button>
+        <button id="labels-toggle" class="tool-button active" aria-pressed="true" title="Toggle component labels">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z"></path></svg><span>Labels</span>
+        </button>
+        <button id="reset-view" class="tool-button" title="Reset camera (R)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 1 1 2 6M4 5v6h6"></path></svg><span>Reset</span>
+        </button>
+      </div>
+      <div class="scene-caption"><span id="view-name">System overview</span><p id="view-note"></p></div>
+      <div class="orbit-hint">Drag to orbit · Scroll to zoom · Select a component for details</div>
+      <div id="focus-chip" class="focus-chip" hidden></div>
+    </main>
+
+    <aside class="control-panel" aria-label="Simulation controls">
+      <section class="live-section">
+        <div class="section-heading"><div><span class="eyebrow">Live system</span><h2>Pump simulation</h2></div><span id="run-badge" class="run-badge">STANDBY</span></div>
+        <div class="telemetry">
+          <div><span>Contactor K1</span><strong id="coil-value">OPEN</strong></div>
+          <div><span>Motor current</span><strong id="current-value">0.0 A</strong></div>
+          <div><span>Water detection</span><strong id="water-value">PRESENT</strong></div>
+          <div><span>SSR channels</span><strong id="ssr-value">OFF / OFF</strong></div>
+        </div>
+        <button id="pump-toggle" class="primary-button"><span class="button-icon">▶</span><span>Run irrigation</span></button>
+        <div class="secondary-actions">
+          <button id="water-toggle" class="secondary-button" aria-pressed="true"><span class="mini-dot water"></span>Water present</button>
+          <button id="demo-button" class="secondary-button"><span class="mini-dot demo"></span>Auto demo</button>
+        </div>
+        <p id="interlock-note" class="interlock-note">Dry-run protection is armed. Both SSR channels operate together.</p>
+      </section>
+
+      <section class="component-section" id="component-section">
+        <span class="eyebrow">Selected component</span>
+        <h2 id="component-title">Tritonis system</h2>
+        <p id="component-body">Choose a view or select hardware in the scene to inspect its function and connections.</p>
+        <ul id="component-specs"></ul>
+      </section>
+      <div class="panel-footer"><span class="key">W</span> wires <span class="key">R</span> reset <span class="key">Space</span> run / stop</div>
+    </aside>
+
+    <section class="guide-panel" aria-label="Guided installation">
+      <div class="guide-topline"><span class="eyebrow">Guided installation</span><span id="step-count">Overview</span></div>
+      <div id="step-dots" class="step-dots" aria-label="Installation steps"></div>
+      <div class="guide-content">
+        <div><span id="step-kicker" class="step-kicker">Explore the system</span><h2 id="step-title">From controller to field feedback</h2><p id="step-body">Start the guided sequence for a terminal-by-terminal installation, or orbit the complete system freely.</p></div>
+        <ul id="step-checks" class="step-checks"></ul>
+      </div>
+      <div class="guide-actions">
+        <button id="guide-start" class="primary-button">Start guided install</button>
+        <button id="step-prev" class="secondary-button" hidden>Back</button>
+        <button id="step-next" class="primary-button" hidden>Next step</button>
+        <button id="step-exit" class="text-button" hidden>Exit guide</button>
+      </div>
+    </section>
+
+    <footer class="safety-strip"><strong>ENGINEERING VISUALIZATION</strong><span>Not a certified wiring diagram. Isolate power; final design and installation require qualified electrical review.</span><span id="perf" aria-hidden="true"></span></footer>
+  </div>
+
+  <dialog id="notes-dialog" aria-labelledby="notes-title">
+    <div class="dialog-header"><div><span class="eyebrow">Design basis</span><h2 id="notes-title">What this prototype shows</h2></div><button id="notes-close" class="icon-button" aria-label="Close project notes">×</button></div>
+    <p>This revised concept uses a 380/400 V AC line-to-line contactor coil: L1 passes through SSR1 to A1 and L2 through SSR2 to A2. Both SSR bodies and their DC control terminals remain inside the closed enclosure; only covered upper AC terminals are accessible. The bottom-facing sensor inputs are a blue-cabled SCT-013-030 current clamp and a yellow-cabled XKC-Y25-NPN water sensor with a flat four-pin plug.</p>
+    <div id="engineering-notes"></div>
+    <div class="dialog-warning"><strong>Production review required</strong><p>Validate SSR leakage against coil drop-out, AC coil suppression, protection coordination, thermal performance, EMC, earthing, enclosure ingress and local electrical regulations. The simulation does not certify safety or pump compatibility.</p></div>
+    <button id="notes-done" class="primary-button">Return to installation</button>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <output id="hud" hidden></output>
+  <script type="module" src="/src/scene.js"></script>
+</body>
+</html>
