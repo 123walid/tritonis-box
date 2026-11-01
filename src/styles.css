@@ -44,9 +44,11 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .tool-button:hover { background: var(--surface-2); color: var(--ink); }
 .tool-button.active { background: #d9e7e1; color: var(--teal); }
 .tool-button svg { width: 17px; height: 17px; }
-.scene-caption { position: absolute; left: 18px; top: 18px; max-width: min(460px, 60%); padding: 12px 15px; background: #f8faf6df; border-left: 3px solid var(--orange); backdrop-filter: blur(10px); box-shadow: 0 8px 28px #173f4214; pointer-events: none; }
+.scene-caption { position: absolute; left: 18px; top: 18px; max-width: min(460px, 60%); padding: 12px 48px 12px 15px; background: #f8faf6df; border-left: 3px solid var(--orange); backdrop-filter: blur(10px); box-shadow: 0 8px 28px #173f4214; }
 .scene-caption span { font-size: 14px; font-weight: 750; }
 .scene-caption p { margin: 4px 0 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.caption-close { position: absolute; right: 6px; top: 6px; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 23px; line-height: 1; }
+.caption-close:hover { background: var(--surface-2); color: var(--ink); }
 .orbit-hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 6px 10px; border-radius: 5px; background: #153c43b8; color: #f5f7f0; font-size: 10px; letter-spacing: .02em; pointer-events: none; }
 .focus-chip { position: absolute; left: 18px; bottom: 18px; max-width: 280px; padding: 8px 12px; border-radius: 5px; background: var(--orange); color: #fff9ef; font-size: 12px; font-weight: 700; }
 .control-panel { grid-column: 3; grid-row: 2 / 4; background: var(--surface); border-left: 1px solid var(--line); overflow-y: auto; z-index: 4; }
@@ -141,8 +143,9 @@ dialog > p { color: var(--muted); font-size: 14px; line-height: 1.65; }
   .view-number { display: none; }
   .view-label { font-size: 11px; }
   #viewport { order: 2; height: 54dvh; min-height: 390px; }
-  .scene-caption { left: 10px; top: 10px; max-width: calc(100% - 120px); padding: 9px 11px; }
+  .scene-caption { left: 10px; top: 10px; max-width: calc(100% - 120px); padding: 9px 48px 9px 11px; }
   .scene-caption p { display: none; }
+  .caption-close { width: 44px; height: 44px; right: 2px; top: 2px; }
   .scene-toolbar { right: 9px; top: 9px; flex-direction: column; }
   .tool-button { min-width: 38px; min-height: 38px; padding: 8px; }
   .orbit-hint { font-size: 9px; bottom: 8px; }

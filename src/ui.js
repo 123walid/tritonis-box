@@ -61,7 +61,8 @@ export function createUI(api) {
 
   $('wires-toggle').addEventListener('click', () => { const on = !api.getState().wires; api.setWires(on); });
   $('labels-toggle').addEventListener('click', () => { const on = !api.getState().labels; api.setLabels(on); });
-  $('reset-view').addEventListener('click', () => { api.resetView(); toast('Camera reset.'); });
+  $('reset-view').addEventListener('click', () => { api.resetView(); $('scene-caption').hidden = false; toast('Camera reset.'); });
+  $('caption-close').addEventListener('click', () => { $('scene-caption').hidden = true; });
   document.querySelector('.brand').addEventListener('click', e => { e.preventDefault(); exitGuide(); });
 
   const dialog = $('notes-dialog');
@@ -124,6 +125,8 @@ export function createUI(api) {
     if (state.view !== lastView) {
       lastView = state.view; const v = VIEWS[state.view];
       $('view-name').textContent = v.label; $('view-note').textContent = v.note;
+      $('scene-caption').hidden = false;
+      $('caption-close').setAttribute('aria-label', `Close ${v.label.toLowerCase()}`);
       document.querySelectorAll('.view-button').forEach(b => { const on = b.dataset.view === state.view; b.classList.toggle('active', on); b.setAttribute('aria-current', on ? 'page' : 'false'); });
     }
   }

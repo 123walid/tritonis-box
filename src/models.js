@@ -42,7 +42,24 @@ export function cylinderBetween(a, b, radius, mat, segments = 16) {
   return m;
 }
 export function cable(points, color, radius = 0.032, name = '') {
-  const curve = new THREE.CatmullRomCurve3(points.map(p => p.isVector3 ? p : new THREE.Vector3(...p)), false, 'centripetal');
+  const pts = points.map(p => p.isVector3 ? p.clone() : new THREE.Vector3(...p));
+  const curve = new THREE.CurvePath();
+  let cursor = pts[0].clone();
+  // Straight service runs with bounded corner radii avoid Catmull–Rom overshoot.
+  for (let i = 1; i < pts.length - 1; i++) {
+    const previous = pts[i - 1], corner = pts[i], next = pts[i + 1];
+    const incoming = corner.clone().sub(previous), outgoing = next.clone().sub(corner);
+    const inLength = incoming.length(), outLength = outgoing.length();
+    if (inLength < 0.0001 || outLength < 0.0001) continue;
+    const dirIn = incoming.normalize(), dirOut = outgoing.normalize();
+    const cut = Math.min(0.18, inLength * 0.3, outLength * 0.3);
+    const entry = corner.clone().addScaledVector(dirIn, -cut);
+    const exit = corner.clone().addScaledVector(dirOut, cut);
+    if (cursor.distanceTo(entry) > 0.0001) curve.add(new THREE.LineCurve3(cursor.clone(), entry));
+    curve.add(new THREE.QuadraticBezierCurve3(entry, corner.clone(), exit));
+    cursor = exit;
+  }
+  curve.add(new THREE.LineCurve3(cursor, pts[pts.length - 1].clone()));
   const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(32, points.length * 16), radius, 8, false), material(color, 0.6));
   mesh.castShadow = true; mesh.name = name; mesh.userData.cable = true;
   return mesh;
@@ -201,7 +218,7 @@ export function createCurrentSensor() {
   const aperture = cyl(0.22, 0.42, M.dark, 0, 0, 0, 32); aperture.rotation.x = Math.PI / 2; g.add(aperture);
   const core = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.055, 12, 32), M.steel); g.add(core);
   const ctLabel = label('SCT-013-030\n30 A : 1 V', 0.72, 0.3, { fg: '#f4f3e9', size: 50 }); ctLabel.position.set(0, -0.1, 0.22); g.add(ctLabel);
-  const cableAnchor = marker(g, 'ctCable', 0.48, -0.35, 0);
+  const cableAnchor = marker(g, 'ctCable', -0.48, -0.35, 0);
   info(g, 'SCT-013-030 current clamp', 'The split core closes around one insulated load conductor only—never around two conductors or the whole cable.', ['Clamp on T1 only', '30 A : 1 V AC', 'Arrow toward pump load']);
   return { group: g, jawA, jawB, cableAnchor };
 }
@@ -233,7 +250,7 @@ export function createEnvironment() {
   outlet.add(box(0.32, 0.4, 0.19, M.black, 0, -0.05, 0.26, 0.03));
   const outletCover = box(1.2, 1.06, 0.05, new THREE.MeshPhysicalMaterial({ color: 0xd5e2df, transparent: true, opacity: 0.25, depthWrite: false }), 0, 0.58, 0.26, 0.04); outletCover.rotation.x = -0.55; outlet.add(outletCover);
   const outletAnchor = marker(outlet, 'outlet', 0, -0.25, 0.34);
-  const safety = label('PUMP STATION  •  CONTROL + FEEDBACK', 5.4, 0.38, { bg: '#153c43', fg: '#f4f3e9', size: 54, weight: 650 }); safety.position.set(1.7, 7.65, -0.96); g.add(safety);
+  const safety = label('PUMP STATION  •  CONTROL + FEEDBACK', 5.4, 0.38, { bg: '#153c43', fg: '#f4f3e9', size: 54, weight: 650 }); safety.position.set(1.7, 8.45, -0.96); g.add(safety);
   return { group: g, outlet, outletAnchor };
 }
 
@@ -253,8 +270,14 @@ export function createWaterStation() {
   const rim = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.06, 10, 32), M.dark); rim.rotation.y = Math.PI / 2; fan.add(rim);
   for (let i = 0; i < 6; i++) { const blade = box(0.06, 0.38, 0.13, M.steel, 0, 0.26, 0, 0.03); blade.rotation.x = i * Math.PI / 3; fan.add(blade); }
   pump.add(box(1.55, 0.18, 1.05, M.dark, 0, -0.72, 0, 0.035));
-  const motorCable = marker(pump, 'motorCable', 0, 0.7, 0);
+  pump.add(box(0.82, 0.26, 0.82, M.dark, 0, 0.72, 0, 0.04));
+  const motorTerminals = [];
+  for (let i = 0; i < 3; i++) {
+    const z = -0.24 + i * 0.24;
+    pump.add(cyl(0.065, 0.06, M.copper, 0, 0.89, z, 20));
+    motorTerminals.push(marker(pump, `motorT${i + 1}`, 0, 0.94, z));
+  }
   info(pump, 'Irrigation pump', 'Animated load. Running current and water flow follow the contactor state in the simulation.', ['Closed-loop feedback', 'Dry-run / no-flow monitoring concept']);
   const pipeLabel = label('NON-METALLIC PVC SECTION', 2.35, 0.25, { bg: '#f0f1ec', fg: '#153c43', size: 55 }); pipeLabel.position.set(3.5, 0.34, 1.72); pipeLabel.rotation.x = -0.35; g.add(pipeLabel);
-  return { group: g, flow, water, fan, motorCable };
+  return { group: g, flow, water, fan, motorTerminals };
 }

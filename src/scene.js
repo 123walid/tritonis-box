@@ -58,6 +58,8 @@ async function boot() {
 
   const ctCenter = worldPos(contactor.t[0]).add(new THREE.Vector3(0, -0.58, 0));
   ct.group.position.copy(ctCenter); ct.group.rotation.x = Math.PI / 2;
+  // Keep the clamp clear of the adjacent T2 conductor while surrounding T1 only.
+  ct.group.scale.setScalar(0.62);
   scene.updateMatrixWorld(true);
 
   const wires = new THREE.Group(); scene.add(wires);
@@ -73,21 +75,52 @@ async function boot() {
     ctPort: worldPos(enclosure.currentPort), waterPort: worldPos(enclosure.waterPort),
     ctCable: worldPos(ct.cableAnchor), waterCable: worldPos(waterSensor.cableAnchor),
     power: worldPos(enclosure.power), outlet: worldPos(environment.outletAnchor),
-    motor: worldPos(waterStation.motorCable),
+    motors: waterStation.motorTerminals.map(terminal => worldPos(terminal)),
   };
   const l1Source = new THREE.Vector3(p.ssr1In.x, 8.0, -0.6);
   const l2Source = new THREE.Vector3(p.ssr2In.x, 8.0, -0.6);
   addWire('a1Supply', [l1Source, p.ssr1In], C.brown, 0.05);
-  addWire('a1Wire', [p.ssr1Out, new THREE.Vector3(p.ssr1Out.x, 6.45, 0.12), new THREE.Vector3(3.15, 6.45, 0.12), p.a1], C.brown, 0.05);
+  // A1 uses the clear lower service lane, then passes behind K1 to its coil terminal.
+  addWire('a1Wire', [
+    p.ssr1Out,
+    new THREE.Vector3(p.ssr1Out.x, 5.65, 0.12),
+    new THREE.Vector3(0.65, 5.65, 0.12),
+    new THREE.Vector3(0.65, p.a1.y, -0.76),
+    new THREE.Vector3(p.a1.x, p.a1.y, -0.76),
+    p.a1
+  ], C.brown, 0.05);
   addWire('a2Supply', [l2Source, p.ssr2In], C.dark, 0.05);
-  addWire('a2Wire', [p.ssr2Out, new THREE.Vector3(-0.35, 5.95, 0.12), new THREE.Vector3(-0.35, 2.25, 0.12), new THREE.Vector3(3.15, 2.25, 0.12), p.a2], C.dark, 0.05);
+  // A2 has its own vertical lane and stays above T1–T3 before entering behind K1.
+  addWire('a2Wire', [
+    p.ssr2Out,
+    new THREE.Vector3(p.ssr2Out.x, 6.1, 0.12),
+    new THREE.Vector3(1.05, 6.1, 0.12),
+    new THREE.Vector3(1.05, 3.15, 0.12),
+    new THREE.Vector3(1.05, 3.15, -0.76),
+    new THREE.Vector3(p.a2.x, 3.15, -0.76),
+    p.a2
+  ], C.dark, 0.05);
   addWire('powerWire', [p.power, new THREE.Vector3(-3, 6.45, 0.05), p.outlet], C.black, 0.075);
-  addWire('ctCable', [p.ctCable, new THREE.Vector3(1.2, 1.35, 0.65), new THREE.Vector3(-3.9, 1.35, 0.65), p.ctPort], C.blue, 0.056);
-  addWire('waterCable', [p.waterCable, new THREE.Vector3(3.5, 0.35, 0.85), new THREE.Vector3(-2.1, 0.35, 0.85), p.waterPort], C.yellow, 0.056);
+  // The blue CT lead exits left, away from T2/T3, and enters below the enclosure.
+  addWire('ctCable', [
+    p.ctCable,
+    new THREE.Vector3(1.1, 1.4, 0.65),
+    new THREE.Vector3(-0.7, 1.4, 0.65),
+    new THREE.Vector3(-1.0, 2.58, 0.35),
+    new THREE.Vector3(p.ctPort.x, 2.58, 0.1),
+    p.ctPort
+  ], C.blue, 0.056);
+  // Yellow remains on a separate lower route and stops below the blue CT lane.
+  addWire('waterCable', [
+    p.waterCable,
+    new THREE.Vector3(3.5, 0.7, 0.85),
+    new THREE.Vector3(-2.12, 0.7, 0.85),
+    p.waterPort
+  ], C.yellow, 0.056);
   const phaseColors = [C.brown, C.dark, 0x737b80];
   contactor.t.forEach((t, i) => {
     const start = worldPos(t); const lane = 1.15 + i * 0.23;
-    addWire(`load${i}`, [start, new THREE.Vector3(start.x, lane + 0.55, start.z), new THREE.Vector3(4.75 + i * 0.18, lane, 0.4), new THREE.Vector3(5.5, 1.55 + i * 0.13, 1.0), p.motor], phaseColors[i], 0.055);
+    addWire(`load${i}`, [start, new THREE.Vector3(start.x, lane + 0.55, start.z), new THREE.Vector3(4.75 + i * 0.18, lane, 0.4), new THREE.Vector3(5.5, 1.55 + i * 0.13, 1.0), p.motors[i]], phaseColors[i], 0.055);
     const top = localPoint(contactor.group, -0.5 + i * 0.5, 1.52, 0.28);
     addWire(`mains${i}`, [new THREE.Vector3(top.x, 8.0, -0.6), top], phaseColors[i], 0.06);
   });
@@ -99,11 +132,13 @@ async function boot() {
 
   const annotations = new THREE.Group(); scene.add(annotations);
   function note(text, pos, w = 1.8) { const l = label(text, w, 0.34, { bg: '#ffffff', fg: '#153c43', size: 72, weight: 800, border: '#78928c' }); l.position.copy(pos); annotations.add(l); return l; }
-  note('L1 → SSR1 → A1', new THREE.Vector3(0.2, 6.55, 0.1), 2.25);
-  note('L2 → SSR2 → A2', new THREE.Vector3(1.15, 2.28, 0.12), 2.25);
-  note('BLUE • CT • T1 ONLY', ctCenter.clone().add(new THREE.Vector3(-0.15, -0.8, 0.55)), 2.35);
+  const coilNotes = [
+    note('L1 → SSR1 → A1', new THREE.Vector3(0.0, 6.8, 0.55), 2.25),
+    note('L2 → SSR2 → A2', new THREE.Vector3(4.9, 3.65, 0.65), 2.25),
+    note('K1 • 380/400 V AC COIL', new THREE.Vector3(4.9, 5.1, 0.55), 2.4)
+  ];
+  note('BLUE • CT • T1 ONLY', new THREE.Vector3(0.25, 2.1, 0.95), 2.1);
   note('YELLOW • XKC-Y25 • NPN', new THREE.Vector3(3.5, 2.05, 1.7), 2.5);
-  note('K1 • 380/400 V AC COIL', new THREE.Vector3(2.4, 6.55, -0.1), 2.4);
 
   const focusMat = new THREE.MeshBasicMaterial({ color: C.orange, transparent: true, opacity: 0.9, depthTest: false });
   const focusRing = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.025, 10, 48), focusMat);
@@ -116,6 +151,7 @@ async function boot() {
 
   function setView(id, instant = false) {
     if (!VIEWS[id]) return; state.view = id;
+    coilNotes.forEach(note => { note.visible = id === 'overview' || id === 'wiring'; });
     const v = VIEWS[id]; const target = new THREE.Vector3(...v.target);
     const fit = camera.aspect < 1.15 ? 1.28 : camera.aspect < 1.4 ? 1.12 : 1;
     const pos = new THREE.Vector3(...v.position).sub(target).multiplyScalar(fit).add(target);

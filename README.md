@@ -21,12 +21,13 @@ npm run preview
 - Closed branded enclosure with a pure white logo panel
 - Two internal SSR-40DA-H-class bodies with only covered upper AC terminal rows accessible
 - Two-phase coil circuit: L1 → SSR1 → A1 and L2 → SSR2 → A2
+- Separated coil, mains and sensor routes, with three individual motor terminals
 - Three-pole contactor with a 380/400 V AC line-to-line coil and motor overload
 - Bottom-facing current-transformer jack with a blue external cable
 - Bottom-facing flat white four-pin water connector with a yellow external cable
 - SCT-013-030 clamp on one T1 load conductor
 - XKC-Y25-NPN sensor on a non-metallic PVC pipe section
-- Nine-step guided installation, selectable components, camera presets and wiring/label toggles
+- Nine-step guided installation, selectable components, camera presets, dismissible view captions and wiring/label toggles
 - Pump, current, water-flow and dry-run-stop simulation
 - Desktop and mobile layouts; no enclosure cutaway
 

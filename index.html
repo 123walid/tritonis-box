@@ -42,7 +42,10 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 1 1 2 6M4 5v6h6"></path></svg><span>Reset</span>
         </button>
       </div>
-      <div class="scene-caption"><span id="view-name">System overview</span><p id="view-note"></p></div>
+      <div class="scene-caption" id="scene-caption">
+        <button id="caption-close" class="caption-close" aria-label="Close system overview" title="Close overview">×</button>
+        <span id="view-name">System overview</span><p id="view-note"></p>
+      </div>
       <div class="orbit-hint">Drag to orbit · Scroll to zoom · Select a component for details</div>
       <div id="focus-chip" class="focus-chip" hidden></div>
     </main>
