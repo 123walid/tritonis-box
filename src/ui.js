@@ -112,7 +112,7 @@ export function createUI(api) {
     $('run-badge').className = `run-badge${running ? ' running' : (!state.waterPresent ? ' fault' : '')}`;
     $('coil-value').textContent = running ? 'CLOSED • 380/400 V AC' : 'OPEN';
     $('current-value').textContent = `${state.current.toFixed(1)} A`;
-    $('water-value').textContent = state.waterPresent ? 'PRESENT' : 'NOT DETECTED';
+    $('water-value').textContent = running && state.waterPresent ? 'FLOW DETECTED' : state.waterPresent ? 'IDLE • NO FLOW' : 'NOT DETECTED';
     $('ssr-value').textContent = running ? 'ON / ON' : 'OFF / OFF';
     $('pump-toggle').classList.toggle('stop', state.pumpCommand);
     $('pump-toggle').innerHTML = `<span class="button-icon">${state.pumpCommand ? '■' : '▶'}</span><span>${state.pumpCommand ? 'Stop irrigation' : 'Run irrigation'}</span>`;

@@ -21,6 +21,10 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .brand img { width: 74px; height: 46px; object-fit: contain; }
 .brand-divider { height: 26px; width: 1px; background: var(--line); }
 .brand-title { font-size: 15px; font-weight: 650; letter-spacing: .02em; }
+.mode-switch { display: flex; align-items: center; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface-2); }
+.mode-switch a { padding: 7px 10px; border-radius: 4px; color: var(--muted); text-decoration: none; font-size: 11px; font-weight: 750; white-space: nowrap; }
+.mode-switch a:hover { color: var(--ink); background: #f4f7f2; }
+.mode-switch a.active { color: #f8faf6; background: var(--teal); }
 .topbar-meta { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 4px #23785818; }
 .rev { border: 1px solid var(--line); border-radius: 4px; padding: 4px 7px; margin-left: 6px; color: var(--ink); }
@@ -163,6 +167,10 @@ dialog > p { color: var(--muted); font-size: 14px; line-height: 1.65; }
 }
 @media (max-width: 520px) {
   .brand-divider { display: none; }
+  .brand-title { display: none; }
+  .mode-switch { margin-left: auto; }
+  .mode-switch a { padding: 7px 8px; font-size: 10px; }
+  .topbar .icon-button { margin-left: 0; }
   .control-panel { display: block; }
   .control-panel section { border-bottom: 1px solid var(--line); }
   .telemetry > div { min-height: 58px; }

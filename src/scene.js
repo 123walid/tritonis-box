@@ -9,7 +9,7 @@ const CAPTURE = params.has('t');
 const DURATION = 12;
 const container = document.getElementById('scene-container');
 const poster = document.getElementById('scene-poster');
-const state = { view: 'overview', step: -1, pumpCommand: true, waterPresent: true, pumpRunning: false, current: 0, wires: true, labels: true, calls: 0, triangles: 0 };
+const state = { view: 'overview', step: -1, pumpCommand: false, waterPresent: true, pumpRunning: false, current: 0, wires: true, labels: true, calls: 0, triangles: 0 };
 let ui;
 
 async function boot() {
@@ -220,7 +220,7 @@ async function boot() {
     [enclosure.ssr1.status, enclosure.ssr2.status].forEach(s => { s.material.emissiveIntensity = state.pumpRunning ? 2.0 : 0.08; });
     waterSensor.status.material.color.setHex(state.waterPresent ? C.green : C.red);
     waterSensor.status.material.emissive.setHex(state.waterPresent ? C.green : C.red);
-    waterSensor.status.material.emissiveIntensity = state.waterPresent ? 1.7 : 0.25;
+    waterSensor.status.material.emissiveIntensity = state.waterPresent ? 1.25 + (1 - Math.cos(phase)) * 0.35 : 0.25;
     waterStation.flow.visible = state.pumpRunning && state.waterPresent;
     waterStation.water.visible = state.waterPresent;
     waterStation.water.material.emissiveIntensity = 0.12 + (1 - Math.cos(phase)) * 0.08;
