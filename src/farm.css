@@ -118,11 +118,15 @@ dialog > p { color: var(--muted); font-size: 13px; line-height: 1.65; }.primary-
   .topbar { min-height: 58px; padding: 0 12px; gap: 8px; position: sticky; top: 0; }
   .brand { gap: 8px; }.brand img { width: 58px; height: 38px; }.brand-title { font-size: 12px; }.topbar-meta { display: none; }.topbar .icon-button { margin-left: auto; }
   .farm-workspace { display: flex; flex-direction: column; }
-  #farm-stage { height: 58dvh; min-height: 440px; }
+  #farm-stage { height: clamp(320px, 58dvh, 560px); }
   .farm-sidebar { overflow: visible; border-left: 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
   .phone { max-width: 320px; }.scenario-panel { margin-top: 4px; }
   .event-panel { width: 330px; }.walk-hint { bottom: 10px; }
   .safety-strip { min-height: 44px; padding: 8px 12px; line-height: 1.4; }#farm-perf { display: none; }
+}
+@media (max-width: 820px) and (orientation: landscape) {
+  #farm-stage { height: calc(100dvh - 58px); min-height: 0; }
+  .event-panel { width: min(330px, calc(100% - 160px)); }
 }
 @media (max-width: 560px) {
   .brand-divider, .brand-title { display: none; }.mode-switch { margin-left: auto; }.mode-switch a { padding: 7px 8px; font-size: 10px; }.topbar .icon-button { margin-left: 0; }
